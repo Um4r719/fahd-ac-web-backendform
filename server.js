@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000; // Hosting ke liye env port
 
 // Allow only your frontend domain
 app.use(cors({
-  origin: 'https://www.fahdac.fit',
+  origin: '*',
   methods: ['GET', 'POST'],
   credentials: true
 }));
