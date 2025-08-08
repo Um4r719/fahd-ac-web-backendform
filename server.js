@@ -3,76 +3,73 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
-const path = require('path');
 
 const app = express();
-const PORT = 3000; // or any port you prefer
+const PORT = process.env.PORT || 3000; // hosting ke liye env port
 
 // Allow all origins (for development)
-app.use(cors());
-
-// OR if you want to allow only 127.0.0.1:5500:
 app.use(cors({
-  origin: 'http://127.0.0.1:5500',
-  methods: ['GET', 'POST'], // jese method use ho rahe ho
+  origin: '*',
+  methods: ['GET', 'POST'],
   credentials: true
 }));
 
-// Serve static files (HTML, CSS, JS)
-app.use(express.static(path.join(__dirname, 'public')));
+// Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// Serve the form page
+// Test route
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.json({ success: true, message: 'Backend API is running 🚀' });
 });
 
 // Handle form submission
 app.post('/api/contact', (req, res) => {
   const { name, email, phone, message } = req.body;
 
-  // Set up Nodemailer transport
+  if (!name || !email || !message) {
+    return res.status(400).json({
+      success: false,
+      message: 'Please fill all required fields.'
+    });
+  }
+
+  // Nodemailer transport
   const transporter = nodemailer.createTransport({
-    service: 'Gmail', // OR use 'Yahoo', 'Outlook', or custom SMTP
+    service: 'Gmail',
     auth: {
-      user: 'umardev032@gmail.com',         // 🔁 Replace with your email
-      pass: 'vcqp nlbk yqka fkhi'   // 🔁 Use app-specific password for Gmail
+      user: 'umardev032@gmail.com',
+      pass: 'vcqp nlbk yqka fkhi' // app password
     }
   });
 
   const mailOptions = {
     from: email,
-    to: 'umarofficial404@gmail.com', // 🔁 Replace with your own email (where you want to receive messages)
+    to: 'umarofficial404@gmail.com',
     subject: 'New Form Submission from Website',
     html: `
       <h2>New Contact Request</h2>
       <p><strong>Name:</strong> ${name}</p>
       <p><strong>Email:</strong> ${email}</p>
-      <p><strong>Phone:</strong> ${phone}</p>
+      <p><strong>Phone:</strong> ${phone || 'N/A'}</p>
       <p><strong>Message:</strong><br>${message}</p>
     `
   };
 
   transporter.sendMail(mailOptions, (err, info) => {
-   if (err) {
-  console.error('Error sending email:', err);
-  res.status(500).json({
-    success: false,
-    message: 'Something went wrong. Please try again later.'
-  });
-} else {
-  console.log('Email sent:', info.response);
-  res.status(200).json({
-    success: true,
-    message: 'Message sent successfully!'
-  });
-}
-
+    if (err) {
+      console.error('❌ Email send error:', err);
+      return res.status(500).json({
+        success: false,
+        message: 'Something went wrong. Please try again later.'
+      });
+    }
+    console.log('✅ Email sent:', info.response);
+    res.json({ success: true, message: 'Message sent successfully!' });
   });
 });
 
-// Start the server
+// Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(`🚀 Server running at port ${PORT}`);
 });
