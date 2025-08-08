@@ -1,15 +1,14 @@
-// server.js
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
 
 const app = express();
-const PORT = process.env.PORT || 3000; // hosting ke liye env port
+const PORT = process.env.PORT || 3000; // Hosting ke liye env port
 
-// Allow all origins (for development)
+// Allow only your frontend domain
 app.use(cors({
-  origin: '*',
+  origin: 'https://www.fahdac.fit',
   methods: ['GET', 'POST'],
   credentials: true
 }));
@@ -39,7 +38,7 @@ app.post('/api/contact', (req, res) => {
     service: 'Gmail',
     auth: {
       user: 'umardev032@gmail.com',
-      pass: 'vcqp nlbk yqka fkhi' // app password
+      pass: 'vcqp nlbk yqka fkhi' // App password
     }
   });
 
